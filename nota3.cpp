@@ -1,418 +1,656 @@
-#include <iostream> 
+#include <iostream>
+#include <string>
 using namespace std;
 
-struct NoArvore {
-    int key;
-    NoArvore *left;
-    NoArvore *right;
-    int bf;
+struct NoArvore{
+	int fb;
+	int key;
+	NoArvore *esquerda;
+	NoArvore *direita;
 };
 
-NoArvore *inserirArvore(NoArvore *&raiz, int chave){
-	if (raiz == NULL) {
-		NoArvore *novoNo = new NoArvore;
-		novoNo -> key = chave;
-		novoNo -> left = NULL;
-		novoNo -> right = NULL;
-		novoNo -> bf = 0;
-		raiz = novoNo;
-		return raiz;
-	} else if (chave < raiz -> key){
-		return inserirArvore(raiz -> left, chave);
-	} else if (chave > raiz -> key){
-		return inserirArvore(raiz -> right, chave);
-	} else {
-		cout << "chave existente" << endl;
+struct NoArvoreNaria{
+	int key;
+	NoArvoreNaria *primeiroFilho;
+	NoArvoreNaria *proxIrmao;
+};
+
+void exibirArvoreOrdem(NoArvore *raiz){
+	if(raiz != NULL){
+		exibirArvoreOrdem(raiz -> esquerda);
+		cout << raiz -> key << " ";
+		exibirArvoreOrdem(raiz -> direita);
 	}
-    return raiz;
-};
+}
 
-void emOrdem(NoArvore* raiz){
-    if (raiz != NULL){
-         emOrdem(raiz -> left);
-         cout << raiz -> key << " ";
-         emOrdem(raiz -> right);
-    }
-};
+void exibirArvoreOrdemFb(NoArvore *raiz){
+	if(raiz != NULL){
+		exibirArvoreOrdemFb(raiz -> esquerda);
+		cout << "Key = " << raiz -> key << " FB = " << raiz -> fb << ", ";
+		exibirArvoreOrdemFb(raiz -> direita);
+	}
+}
 
-void posOrdem(NoArvore* raiz){
-    if (raiz != NULL){
-         posOrdem(raiz -> left);
-         posOrdem(raiz -> right);
-         cout << raiz -> key << " ";
-    }
-};
+void exibirArvorePreOrdem(NoArvore *raiz){
+	if(raiz != NULL){
+		cout << raiz -> key << " ";
+		exibirArvorePreOrdem(raiz -> esquerda);
+		exibirArvorePreOrdem(raiz -> direita);
+	}
+}
 
-bool comparaArvore(NoArvore* raiz1, NoArvore* raiz2){
-    if (raiz1 == NULL){
-        if (raiz2 != NULL){
-            return false;
-        }
-        return true;
-    } 
-    
-    if (raiz1 -> key == raiz2 -> key){
-        return comparaArvore(raiz1 -> left, raiz2 -> left) && comparaArvore(raiz1 -> right, raiz2 -> right);
-    }
-    return false;
-};
+void exibirArvorePosOrdem(NoArvore *raiz){
+	if(raiz != NULL){
+		exibirArvorePosOrdem(raiz -> esquerda);
+		exibirArvorePosOrdem(raiz -> direita);
+		cout << raiz -> key << " ";
+	}
+}
+
+void posOrdemNaria(NoArvoreNaria *raiz){
+	if(raiz != NULL){
+		posOrdemNaria(raiz->primeiroFilho);
+		posOrdemNaria(raiz->proxIrmao);
+		cout << raiz -> key << " ";
+	}
+}
+
+bool sameBST(NoArvore *raiz1, NoArvore *raiz2){
+	if(raiz1==NULL){
+		if(raiz2!=NULL){
+			return false;
+		}
+		return true;
+	}
+	if(raiz1 -> key == raiz2 -> key){
+		return sameBST(raiz1 -> esquerda, raiz2 -> esquerda) && sameBST(raiz1 -> direita, raiz2 -> direita);
+	}
+	return false;
+}
+
+int heightArvore(NoArvore *raiz){
+	if(raiz == NULL){
+		return 0;
+	}else{
+		if(raiz -> esquerda == NULL && raiz -> direita == NULL){
+			return 1;
+		}else if(raiz -> esquerda != NULL && raiz -> direita != NULL){
+			if(heightArvore(raiz -> direita) >= heightArvore(raiz -> esquerda)){
+				return 1 + heightArvore(raiz -> direita);
+			}else{
+				return 1 + heightArvore(raiz -> esquerda);
+			}
+		}else if(raiz -> esquerda != NULL){
+			return 1 + heightArvore(raiz -> esquerda);
+		}else{
+			return 1 + heightArvore(raiz -> direita);
+		}
+	}
+}
 
 int alturaArvore(NoArvore *raiz){
-	if (raiz!= NULL){
-		if (raiz -> left == NULL && raiz -> right == NULL){
+	if(raiz == NULL){
+		return 0;
+	}else{
+		if(raiz -> esquerda == NULL && raiz -> direita == NULL){
 			return 0;
-		} else if (raiz -> left != NULL && raiz -> right != NULL){
-			if (alturaArvore(raiz -> right) >= alturaArvore(raiz -> left)){
-				return 1 + alturaArvore(raiz -> right);
+		}else if(raiz -> esquerda != NULL && raiz -> direita != NULL){
+			if(alturaArvore(raiz -> direita) >= alturaArvore(raiz -> esquerda)){
+				return 1 + alturaArvore(raiz -> direita);
 			}else{
-				return 1 + alturaArvore(raiz -> left);
+				return 1 + alturaArvore(raiz -> esquerda);
 			}
-		} else if (raiz -> left != NULL){
-			return 1 + alturaArvore(raiz -> left);
-		} else {
-			return 1 + alturaArvore(raiz -> right);
+		}else if(raiz -> esquerda != NULL){
+			return 1 + alturaArvore(raiz -> esquerda);
+		}else{
+			return 1 + alturaArvore(raiz -> direita);
 		}
 	}
-};
+}
 
-bool somaFolhaIgualRaiz(NoArvore *raiz){
-    if (raiz != NULL){
-        if (raiz -> key == (raiz -> left -> key) + (raiz -> right -> key))
-            return true; 
-        else {
-            return false;
-        } 
-    }
-};
-
-bool igualArvore(NoArvore *raiz1, NoArvore *raiz2){
-    if (raiz1 != NULL){
-        if (raiz2 == NULL){
-            return false;
-        }
-        return true;
-    }
-    if (raiz1 -> key == raiz2 -> key){
-        return igualArvore(raiz1 -> left, raiz2 -> left) && igualArvore(raiz1 -> right, raiz2 -> right);
-    }
-    return false;
-};
-
-void atualizaBF(NoArvore *raiz){
-	if (raiz != NULL){
-		raiz -> bf = alturaArvore(raiz -> left) - alturaArvore(raiz -> right);
-		atualizaBF(raiz -> left);
-		atualizaBF(raiz -> right);
-	}
-};
-
-bool confereBalanceamento(NoArvore *raiz){
-	atualizaBF(raiz);
-	if (raiz != NULL){
-		return (raiz -> bf < 2 && raiz -> bf > -2) && confereBalanceamento(raiz -> left) && confereBalanceamento(raiz -> right);
-	} else {
-		return true;
-	}
-};
-
-NoArvore *rotacaoD(NoArvore *raiz){
-	if (raiz != NULL && raiz -> left != NULL){
+NoArvore *rotacaoDireita(NoArvore *&raiz){
+	if(raiz != NULL && raiz -> esquerda != NULL){
 		NoArvore *aux = raiz;
-		raiz = raiz -> right;
-		aux -> left = NULL;
-		if (raiz -> right != NULL){
-			aux -> left = raiz -> right;
+		raiz = raiz -> esquerda;
+		aux -> esquerda = NULL;
+		if(raiz -> direita != NULL){
+			aux -> esquerda = raiz -> direita;
 		}
-		raiz -> right = aux;
+		raiz -> direita = aux;
 	}
 	return raiz;
-};
+}
 
-NoArvore *rotacaoE(NoArvore *raiz){
-	if (raiz != NULL && raiz -> right != NULL){
+NoArvore *rotacaoEsquerda(NoArvore *&raiz){
+	if(raiz != NULL && raiz -> direita != NULL){
 		NoArvore *aux = raiz;
-		raiz = raiz -> right;
-		aux -> right = NULL;
-		if (raiz -> left != NULL){
-			aux -> right = raiz -> left;
+		raiz = raiz -> direita;
+		aux -> direita = NULL;
+		if(raiz -> esquerda != NULL){
+			aux -> direita = raiz -> esquerda;
 		}
-		raiz -> left = aux;	
+		raiz -> esquerda = aux;	
 	}
 	return raiz;
-};
+}
 
-NoArvore *rotacaoDD(NoArvore *raiz){
-	if (raiz != NULL && raiz -> left != NULL){
-		rotacaoE(raiz -> left);
-		return rotacaoD(raiz);
+NoArvore *rotacaoDuplaDireita(NoArvore *&raiz){
+	if(raiz != NULL && raiz -> esquerda != NULL){
+		rotacaoEsquerda(raiz -> esquerda);
+		return rotacaoDireita(raiz);
 	}
-};
+}
 
-NoArvore *rotacaoDE(NoArvore *raiz){
-	if (raiz != NULL && raiz -> right != NULL){
-		rotacaoD(raiz -> right);
-		return rotacaoE(raiz);
+NoArvore *rotacaoDuplaEsquerda(NoArvore *&raiz){
+	if(raiz != NULL && raiz -> direita != NULL){
+		rotacaoDireita(raiz -> direita);
+		return rotacaoEsquerda(raiz);
 	}
-};
+}
 
-NoArvore *balanceiaAVL(NoArvore *raiz){
-	if (raiz != NULL){
-		balanceiaAVL(raiz -> left);
-		balanceiaAVL(raiz -> right);
-		atualizaBF(raiz);
-		if (raiz -> bf > 1){
-			if (raiz -> left -> bf >= 0){
-				return rotacaoD(raiz);
-			} else {
-				return rotacaoDD(raiz);
+void atualizarFb(NoArvore *&raiz){
+	if(raiz != NULL){
+		raiz -> fb = heightArvore(raiz -> esquerda) - heightArvore(raiz -> direita);
+		atualizarFb(raiz -> esquerda);
+		atualizarFb(raiz -> direita);
+	}
+}
+
+NoArvore *balancearAVL(NoArvore *&raiz){
+	if(raiz != NULL){
+		balancearAVL(raiz -> esquerda);
+		balancearAVL(raiz -> direita);
+		atualizarFb(raiz);
+		if(raiz -> fb > 1){
+			if(raiz -> esquerda -> fb >= 0){
+				return rotacaoDireita(raiz);
+			}else{
+				return rotacaoDuplaDireita(raiz);
 			}
-		} else if (raiz -> bf < -1){
-			if (raiz -> right -> bf <= 0){
-				return rotacaoE(raiz);
-			} else {
-				return rotacaoDE(raiz);
+		}else if(raiz -> fb < -1){
+			if(raiz -> direita -> fb <= 0){
+				return rotacaoEsquerda(raiz);
+			}else{
+				return rotacaoDuplaEsquerda(raiz);
 			}
 		}
 		return raiz;
 	}
-};
+}
 
-void balancearArvore(NoArvore *raiz){
-	while (confereBalanceamento(raiz) != true){
-		raiz =  balanceiaAVL(raiz);
-		atualizaBF(raiz);
+NoArvore *inserirSemFb(NoArvore *&raiz, int chave){
+	if(raiz == NULL){
+		NoArvore *novoNo = new NoArvore;
+		novoNo -> key = chave;
+		novoNo -> esquerda = NULL;
+		novoNo -> direita = NULL;
+		novoNo -> fb = 0;
+		raiz = novoNo;
+		return raiz;
+	} else if(chave < raiz -> key){
+		return inserirSemFb(raiz->esquerda, chave);
+	} else if(chave > raiz -> key){
+		return inserirSemFb(raiz->direita, chave);
+	}else{
+		cout << "Chave ja existe." << endl;
 	}
-};
+}
 
-bool confereBST(NoArvore *raiz){
-	if (raiz != NULL){
-		if (raiz -> left == NULL && raiz -> right == NULL){
-			return true;
-		} else if (raiz -> left == NULL){
-			if (raiz -> left -> key >= raiz -> key){
-				return false;
-			}
-			return confereBST(raiz-> left);
-		} else if (raiz -> left == NULL){
-			if (raiz -> right -> key <= raiz -> key){
-				return false;
-			}
-			return confereBST(raiz-> right);
-		} else {
-			if (raiz -> right -> key <= raiz -> key || raiz -> left -> key >= raiz -> key){
-				return false;
-			}
-			return confereBST(raiz -> left) && confereBST(raiz -> right);
-		}
-	} else {
+NoArvore *inserirTrioSemFb(NoArvore *&raiz, int chave){
+	if(raiz == NULL){
+		NoArvore *novoNo = new NoArvore;
+		novoNo -> key = chave;
+		novoNo -> esquerda = NULL;
+		novoNo -> direita = NULL;
+		novoNo -> fb = 0;
+		raiz = novoNo;
+		return raiz;
+	} else if(raiz -> esquerda == NULL){
+		return inserirTrioSemFb(raiz -> esquerda, chave);
+	} else if(raiz -> direita == NULL){
+		return inserirTrioSemFb(raiz -> direita, chave);
+	}else{
+		cout << "A arvore ja possui raiz e 2 filhos." << endl;
+	}
+}
+
+NoArvore *inserirAVL(NoArvore *&raiz, int chave){
+	inserirSemFb(raiz, chave);
+	raiz = balancearAVL(raiz);
+	atualizarFb(raiz);
+	return raiz;
+}
+
+NoArvore *inserir(NoArvore *&raiz, int chave){
+	inserirSemFb(raiz, chave);
+	atualizarFb(raiz);
+	return raiz;
+}
+
+NoArvore *inserirTrio(NoArvore *&raiz, int chave){
+	inserirTrioSemFb(raiz, chave);
+	atualizarFb(raiz);
+	return raiz;
+}
+
+bool isBalanced(NoArvore *raiz){
+	atualizarFb(raiz);
+	if(raiz != NULL){
+		return (raiz -> fb < 2 && raiz -> fb > -2) && isBalanced(raiz -> esquerda) && isBalanced(raiz -> direita);
+	}else{
 		return true;
 	}
-};
+}
 
-void inverteArvore(NoArvore *raiz){
-	if (raiz != NULL){
-		NoArvore *aux = raiz -> right;
-		raiz -> right = raiz -> left;
-		raiz -> left = aux;
-
-		inverteArvore(raiz -> left);
-		inverteArvore(raiz -> right);
+void balancearArvore(NoArvore *&raiz){
+	while(isBalanced(raiz) != true){
+		raiz = balancearAVL(raiz);
+		atualizarFb(raiz);
 	}
-};
+}
+
+bool isBST(NoArvore *raiz){
+	if(raiz != NULL){
+		if(raiz -> esquerda == NULL && raiz -> direita == NULL){
+			return true;
+		}else if(raiz -> direita == NULL){
+			if(raiz -> esquerda -> key >= raiz -> key){
+				return false;
+			}
+			return isBST(raiz-> esquerda);
+		}else if(raiz -> esquerda == NULL){
+			if(raiz -> direita -> key <= raiz -> key){
+				return false;
+			}
+			return isBST(raiz-> direita);
+		}else{
+			if(raiz -> direita -> key <= raiz -> key || raiz -> esquerda -> key >= raiz -> key){
+				return false;
+			}
+			return isBST(raiz->esquerda) && isBST(raiz -> direita);
+		}
+	}else{
+		return true;
+	}
+}
+
+void inverterArvore(NoArvore *&raiz){
+	if(raiz != NULL){
+		NoArvore *aux = raiz -> esquerda;
+		raiz -> esquerda = raiz -> direita;
+		raiz -> direita = aux;
+		inverterArvore(raiz -> esquerda);
+		inverterArvore(raiz -> direita);
+	}
+}
+
+NoArvore *mergeArvore(NoArvore *raiz1, NoArvore *raiz2){
+	NoArvore *novaRaiz = new NoArvore;
+	novaRaiz -> esquerda = NULL;
+	novaRaiz -> direita = NULL;
+	novaRaiz -> fb = 0;
+	if(raiz1 != NULL && raiz2 != NULL){
+		novaRaiz -> key = raiz1 -> key + raiz2 -> key;
+		novaRaiz -> esquerda = mergeArvore(raiz1 -> esquerda, raiz2 -> esquerda);
+		novaRaiz -> direita = mergeArvore(raiz1 -> direita, raiz2 -> direita);
+		atualizarFb(novaRaiz);
+		return novaRaiz;
+	} else if(raiz1 != NULL){
+		novaRaiz = raiz1;
+	} else if(raiz2 != NULL){
+		novaRaiz = raiz2;
+	} else{
+		delete novaRaiz;
+		return NULL;
+	}
+}
+
+int contarNo(NoArvore *raiz){
+	if(raiz!=NULL){
+		return 1 + contarNo(raiz -> esquerda) + contarNo(raiz -> direita);
+	}else{
+		return 0;
+	}
+}
+
+bool somaIgualRaiz(NoArvore *raiz){
+	if(contarNo(raiz) == 3 && raiz -> esquerda != NULL && raiz -> direita != NULL){
+		return (raiz -> key == raiz -> esquerda -> key + raiz -> direita -> key);
+	} else{
+		cout << "A arvore nao possui exatos 3 elementos (raiz, filho esquerda e filho direita)." << endl;
+	}
+}
 
 int somaFolhas(NoArvore *raiz){
-    if (raiz != NULL){
-        if (raiz -> left != NULL && raiz -> right != NULL){
-            return raiz -> key + (somaFolhas(raiz -> left)) + (somaFolhas(raiz -> right));
-        }
-    }
-};
+	if(raiz!=NULL){
+		if(raiz->esquerda==NULL && raiz->direita == NULL){
+			return raiz -> key;
+		}else{
+			return somaFolhas(raiz -> esquerda) + somaFolhas(raiz -> direita);
+		}
+	}else{
+		return 0;
+	}
+}
 
-int somaNo(NoArvore *raiz){
-    if (raiz != NULL){
-        return raiz -> key + (somaNo(raiz -> left)) + (somaNo(raiz -> right));
-        }
-};
+NoArvore *maiorNo(NoArvore *no1, NoArvore *no2){
+	if(no1 != NULL && no2 != NULL){
+		if(no1 -> key > no2 -> key){
+			return no1;
+		}else{
+			return no2;
+		}
+	}else if(no1 == NULL){
+		return no2;
+	} else if(no2 == NULL){
+		return no1;
+	} else{
+		return NULL;
+	}	
+}
 
-int maiorSubArvore(NoArvore *raiz){
-    int somaE;
-    int somaD;
-    if (raiz != NULL){
-        somaE = somaNo(raiz -> left);
-        somaD = somaNo(raiz -> right);
-        if (somaE > somaD){
-            cout << "A maior Subarvore eh a da esquerda, sendo sua soma: " << endl;
-            return somaE;
-        }   
-        if (somaD > somaE){
-            cout << "A maior Subarvore eh a da direita, sendo sua soma: " << endl;
-            return somaD;
-        }
-    }
-};
+NoArvore *maiorNivel(NoArvore *raiz, int nivel){
+	if(raiz != NULL){
+		if(nivel == 0){
+			return raiz;
+		}else if(nivel == 1){
+			return maiorNo(raiz -> esquerda, raiz -> direita);
+		}else{
+			return maiorNo(maiorNivel(raiz -> esquerda, nivel-1), maiorNivel(raiz -> direita, nivel-1));
+		}
+	}else{
+		return NULL;
+	}
+}
 
-NoArvore *transformaVetor(int vetor[], int n){
-    NoArvore* raiz = NULL;
-    for (int i; i < n; i++){
-        inserirArvore(raiz, i);
-    }
-};
+void maiorCadaNivel(NoArvore *raiz){
+	for(int i = 0; i < heightArvore(raiz); i++){
+		cout << "Maior do nivel " << i << ": " << maiorNivel(raiz, i) -> key << endl;
+	}
+}
 
-NoArvore *maiorNoBST(NoArvore *raiz){
-    if (raiz != NULL){
-        if (raiz -> right != NULL){
-            return maiorNoBST(raiz -> right);
-        }
-    } else {
-        return raiz;
-    }
-};
+int somaNos(NoArvore *raiz){
+	if(raiz!=NULL){
+		return raiz -> key + somaNos(raiz -> esquerda) + somaNos(raiz -> direita);
+	}else{
+		return 0;
+	}
+}
 
-NoArvore *menorNoBST(NoArvore *raiz){
-    if (raiz != NULL){
-        if (raiz -> left != NULL){
-            return menorNoBST(raiz -> left);
-        }
-    } else {
-        return raiz;
-    }
-};
+int somaMaiorSubarvore(NoArvore *raiz){
+	int somaEsquerda = somaNos(raiz -> esquerda);
+	int somaDireita = somaNos(raiz -> direita);
+	if(somaEsquerda > somaDireita){
+		return somaEsquerda;
+	}else{
+		return somaDireita;
+	}
+}
 
-void buscaNaBST(NoArvore *raiz, int valor){
-    if (raiz != NULL){
-        if (valor > raiz -> key) {
-            buscaNaBST(raiz -> right, valor);
-        } else if (valor < raiz -> key){
-            buscaNaBST(raiz -> left, valor);
-        } else {
-            cout << "O valor foi encontrado." << endl;
-        }
-    } else {
-        cout << "O valor nao foi encontrado ou a raiz eh invalida" << endl;
-    } 
-};
+NoArvore *arrayParaArvore(int vetor[], int tamanhoVetor){
+	NoArvore *raiz = NULL;
+	for(int i = 0; i<tamanhoVetor; i++){
+		inserir(raiz, vetor[i]);
+	}
+	return raiz;
+}
 
-int main(){
+NoArvore *maiorBST(NoArvore *raiz){
+	if(raiz != NULL && raiz -> direita == NULL){
+		return raiz;
+	}else if(raiz != NULL && raiz -> direita != NULL){
+		return maiorBST(raiz->direita);
+	}
+}
 
-    //Arvore Principal
-	NoArvore *raiz1 = NULL;
+NoArvore *menorBST(NoArvore *raiz){
+	if(raiz != NULL && raiz -> esquerda == NULL){
+		return raiz;
+	}else if(raiz != NULL && raiz -> esquerda != NULL){
+		return menorBST(raiz->esquerda);
+	}
+}
 
-	inserirArvore(raiz1, 10);
-	inserirArvore(raiz1, 20);
-	inserirArvore(raiz1, 30);
-	inserirArvore(raiz1, 40);
-	inserirArvore(raiz1, 50);
-	inserirArvore(raiz1, 60);
-	inserirArvore(raiz1, 70);
-    inserirArvore(raiz1, 80);
-    inserirArvore(raiz1, 90);
-    inserirArvore(raiz1, 100);
+NoArvore *buscaBinaria(NoArvore *raiz, int valor){
+	if(raiz==NULL || raiz->key == valor){
+		return raiz;
+	}else if(valor < raiz -> key){
+		buscaBinaria(raiz->esquerda, valor);
+	} else{
+		buscaBinaria(raiz->direita, valor);
+	}
+}
 
+void resultadoBuscaBinaria(NoArvore *raiz, int valor){
+	NoArvore *resultado = buscaBinaria(raiz, valor);
+	if(resultado == NULL){
+		cout << valor << " nao encontrado na arvore." << endl;
+	}else{
+		cout << valor << " encontrado. Key = " << resultado -> key <<endl;
+	}
+}
+/*
+string printCaminho(NoArvore *raiz){
+	if(raiz != NULL){
+		if(raiz -> esquerda == NULL && raiz -> direita == NULL){
+			return to_string(raiz -> key) + ", ";
+		} else if(raiz -> direita == NULL){
+			return to_string(raiz -> key) + "->" + printCaminho(raiz -> esquerda);
+		} else if(raiz -> esquerda == NULL){
+			return to_string(raiz -> key) + "->" + printCaminho(raiz -> direita);
+		} else{
+			return to_string(raiz -> key) + "->" + printCaminho(raiz -> esquerda) + to_string(raiz -> key) + "->" + printCaminho(raiz -> direita);
+		}
+	}
+}
+*/
 
-	//Arvore Teste
+int main() {
+	//Arvore 1
+	NoArvore *raiz = NULL;
+	inserir(raiz, 15);
+	inserir(raiz, 10);
+	inserir(raiz, 7);
+	inserir(raiz, 11);
+	inserir(raiz, 23);
+	inserir(raiz, 12);
+	inserir(raiz, 1);
+	//Arvore 2
 	NoArvore *raiz2 = NULL;
-
-	inserirArvore(raiz2, 1);
-	inserirArvore(raiz2, 3);
-	inserirArvore(raiz2, 5);
-	inserirArvore(raiz2, 7);
-	inserirArvore(raiz2, 9);
-
-
-	//Arvore Simples
+	inserir(raiz2, 15);
+	inserir(raiz2, 10);
+	inserir(raiz2, 7);
+	inserir(raiz2, 11);
+	inserir(raiz2, 23);
+	inserir(raiz2, 12);
+	inserir(raiz2, 1);
+	//Arvore 3
 	NoArvore *raiz3 = NULL;
-
-	inserirArvore(raiz3, 5);
-	inserirArvore(raiz3, 10);
-	inserirArvore(raiz3, 15);
-
-
-// Questão 1 
-cout << "Questao 1: ";
-emOrdem(raiz1);
-cout << endl;
-
-// Questão 2
-cout << "Questao 2: ";
-cout << "Arvore 1 e 2 sao iguais?: " << comparaArvore(raiz1, raiz3);
-cout << endl;
-
-// Questão 3 e 4
-cout << "Questao 3 e 4: ";
-posOrdem(raiz1);
-cout << endl;
-
-// Questão 6 e 7
-cout << "Questao 6 e 7: ";
-cout << alturaArvore(raiz1);
-cout << endl;
-
-// Questão 8
-cout << "Questao 8: ";
-cout << confereBalanceamento(raiz1);
-cout << endl;
-
-// Questão 9
-cout << "Questao 9: ";
-emOrdem(raiz2);
-cout << endl;
-balancearArvore(raiz2);
-cout << endl;
-
-
-// Questão 10
-cout << "Questao 10: ";
-cout << confereBST(raiz1);
-cout << endl;
-
-// Questão 11
-cout << "Questao 11: ";
-emOrdem(raiz1);
-cout << endl;
-inverteArvore(raiz1);
-cout << endl;
-emOrdem(raiz1);
-cout << endl;
-inverteArvore(raiz1);
-cout << endl;
-
-// Questão 13
-cout << "Questao 13: ";
-cout << somaFolhaIgualRaiz(raiz3);
-cout << endl;
-
-// Questão 15
-cout << "Questao 15: ";
-cout << somaFolhas(raiz1);
-cout << endl;
-
-// Questão 17
-cout << "Questao 17: ";
-cout << maiorSubArvore(raiz2);
-cout << endl;
-
-// Questão 18
-int vetor[5] = {1, 2, 3, 4, 5};
-cout << "Questao 18: ";
-cout << endl;
-NoArvore *raiz4 = transformaVetor(vetor, 5);
-cout << endl;
-emOrdem(raiz4);
-cout << endl;
-
-// Questão 19
-cout << "Questao 19: ";
-cout << maiorNoBST(raiz2);
-cout << endl;
-
-// Questão 20
-cout << "Questao 20: ";
-cout << menorNoBST(raiz2);
-cout << endl;
-
-// Questão 21
-cout << "Questao 21: ";
-buscaNaBST(raiz1, 7);
-cout << endl;
-
-};
+	inserir(raiz3, 3);
+	inserir(raiz3, 2);
+	inserir(raiz3, 1);
+	inserir(raiz3, 4);
+	//Arvore 4
+	NoArvore *raiz4 = NULL;
+	inserirTrio(raiz4, 7);
+	inserirTrio(raiz4, 3);
+	inserirTrio(raiz4, 4);
+	//Arvore 5
+	NoArvore *raiz5 = NULL;
+	inserirTrio(raiz5, 12);
+	inserirTrio(raiz5, 3);
+	inserirTrio(raiz5, 4);
+	
+	//Questao 1
+	cout << "Arvore 1 em Ordem: ";
+	exibirArvoreOrdem(raiz);
+	cout << endl;
+	
+	//Questao 2
+	cout << "Arvore 1 e 2 sao iguais? " << boolalpha;
+	cout << sameBST(raiz, raiz2);
+	cout << endl;
+	
+	//Questao 3
+	cout << "Arvore 1 em Pre Ordem: ";
+	exibirArvorePreOrdem(raiz);
+	cout << endl;
+	
+	//Questao 4
+	cout << "Arvore 1 em Pos Ordem: ";
+	exibirArvorePosOrdem(raiz);
+	cout << endl;
+	
+	/*
+	//Questao 5
+	cout << "Caminhos: ";
+	cout << printCaminho(raiz);
+	cout << endl;
+	*/
+	
+	//Questao 6 e 7
+	cout << "Altura e Profundidade da arvore 1 = ";
+	cout << alturaArvore(raiz);
+	cout << endl;
+	
+	//Questao 8
+	cout << "Arvore 1: " << endl;
+	exibirArvoreOrdemFb(raiz);
+	cout << endl;
+	cout << "A arvore 1 esta balanceada? ";
+	cout << isBalanced(raiz);
+	cout << endl;
+	
+	//Questao 9
+	cout << "balanceando... " << endl;
+	balancearArvore(raiz);
+	cout << "Arvore 1: " << endl;
+	exibirArvoreOrdemFb(raiz);
+	cout << endl;
+	cout << "A arvore 1 esta balanceada? ";
+	cout << isBalanced(raiz);
+	cout << endl;
+	
+	//Questao 10
+	cout << "A arvore 1 eh BST? ";
+	cout << isBST(raiz);
+	cout << endl;
+	
+	//Questao 11
+	inverterArvore(raiz);
+	cout << "Arvore 1 invertida: " << endl;
+	exibirArvoreOrdem(raiz);
+	inverterArvore(raiz);
+	cout << endl;
+	
+	//Questao 12
+	cout << "Arvore 1: " << endl;
+	exibirArvoreOrdem(raiz);
+	cout << endl;
+	
+	cout << "Arvore 3: " << endl;
+	exibirArvoreOrdem(raiz3);
+	cout << endl;
+	
+	cout << "Merge 1 e 3: " << endl;
+	exibirArvoreOrdem(mergeArvore(raiz, raiz3));
+	cout << endl;
+	
+	//Questao 13
+	cout << "Arvore 4: " << endl;
+	exibirArvoreOrdem(raiz4);
+	cout << endl;
+	cout << "Soma dos filhos igual a raiz? " << somaIgualRaiz(raiz4) <<endl;
+	cout << "Arvore 5: " << endl;
+	exibirArvoreOrdem(raiz5);
+	cout << endl;
+	cout << "Soma dos filhos igual a raiz? " << somaIgualRaiz(raiz5) <<endl;
+	
+	//Questao14
+	NoArvoreNaria *raizN1 = new NoArvoreNaria;
+	raizN1->key = 1;
+	raizN1->primeiroFilho = NULL;
+	raizN1->proxIrmao = NULL;
+	
+	NoArvoreNaria *raizN2 = new NoArvoreNaria;
+	raizN2->key = 2;
+	raizN2->primeiroFilho = NULL;
+	raizN2->proxIrmao = NULL;
+	
+	NoArvoreNaria *raizN3 = new NoArvoreNaria;
+	raizN3->key = 3;
+	raizN3->primeiroFilho = NULL;
+	raizN3->proxIrmao = NULL;
+	
+	NoArvoreNaria *raizN4 = new NoArvoreNaria;
+	raizN4->key = 4;
+	raizN4->primeiroFilho = NULL;
+	raizN4->proxIrmao = NULL;
+	
+	raizN1->primeiroFilho = raizN2;
+	raizN2->proxIrmao = raizN3;
+	raizN3->proxIrmao = raizN4;
+	
+	NoArvoreNaria *raizN5 = new NoArvoreNaria;
+	raizN5->key = 5;
+	raizN5->primeiroFilho = NULL;
+	raizN5->proxIrmao = NULL;
+	
+	NoArvoreNaria *raizN6 = new NoArvoreNaria;
+	raizN6->key = 6;
+	raizN6->primeiroFilho = NULL;
+	raizN6->proxIrmao = NULL;
+	
+	raizN2->primeiroFilho = raizN5;
+	raizN5->proxIrmao = raizN6;
+	
+	NoArvoreNaria *raizN7 = new NoArvoreNaria;
+	raizN7->key = 7;
+	raizN7->primeiroFilho = NULL;
+	raizN7->proxIrmao = NULL;
+	
+	raizN4->primeiroFilho = raizN7;
+	
+	cout << "Arvore n-aria em pos ordem: " << endl;
+	posOrdemNaria(raizN1);
+	cout << endl;
+	//Questao 15
+	cout << "Arvore 1: " << endl;
+	exibirArvoreOrdem(raiz);
+	cout << endl;
+	cout << "Soma das folhas da arvore 1: " << somaFolhas(raiz)<<endl;
+	
+	//Questao 16
+	maiorCadaNivel(raiz);
+	
+	//Questao 17
+	cout << "Soma da maior subarvore da arvore 1: " << somaMaiorSubarvore(raiz) << endl;
+	
+	//Questao 18
+	cout << "Vetor = ";
+	int vetor[7] = {1, 3, 6, 8, 12, 15, 21};
+	for(int i = 0; i<7;i++){
+		cout << vetor[i] << " ";
+	}
+	cout << endl;
+	NoArvore *raiz6 = arrayParaArvore(vetor, 7);
+	cout << "Arvore 6: " << endl;
+	exibirArvoreOrdem(raiz6);
+	cout << endl;
+	
+	//Questao 19
+	cout << "Arvore 1: " << endl;
+	exibirArvoreOrdem(raiz);
+	cout << endl;
+	cout << "Maior no da arvore 1: " << maiorBST(raiz) -> key << endl;
+	
+	//Questao 20
+	cout << "Menor no da arvore 1: " << menorBST(raiz) -> key << endl;
+	
+	//Questao 21
+	cout << "Busca binaria pelo 3 na arvore 1: " << endl;
+	resultadoBuscaBinaria(raiz, 3);
+	cout << "Busca binaria pelo 7 na arvore 1: " << endl;
+	resultadoBuscaBinaria(raiz, 7);
+	return 0;
+}
